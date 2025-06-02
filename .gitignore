@@ -1,0 +1,27 @@
+Build artifacts
+
+build/
+
+Object files
+
+*.o *.obj
+
+Executables
+
+*.exe ydlidar_x4_app
+
+Libraries
+
+*.a *.so
+
+CMake generated files
+
+CMakeCache.txt CMakeFiles/ cmake_install.cmake Makefile
+
+Editor temporary files
+
+*.swp *~
+
+Sensitive files
+
+.git-credentials
