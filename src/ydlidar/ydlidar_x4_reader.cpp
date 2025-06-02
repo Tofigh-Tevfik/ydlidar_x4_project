@@ -44,12 +44,29 @@ YDLidarX4Reader::YDLidarX4Reader() {
     // flush the port
     tcflush(fd, TCIOFLUSH);
 
-    uint8_t start_cmd[] = {0xA5, 0x60};
+    // stop the lidar if it is already running
+    uint8_t stop_cmd[] = {0xA5, 0x65};
+    if (write(fd, stop_cmd, sizeof(stop_cmd)) != sizeof(stop_cmd)) {
+        close(fd);
+        throw std::runtime_error("Failed to send stop command: " + std::string(strerror(errno)));
+    }
+    usleep(100000); // 0.1s delay
+
+    // get device info
+    uint8_t info_cmd[] = {0xA5, 0x90};
+    if (write(fd, info_cmd, sizeof(info_cmd)) != sizeof(info_cmd)) {
+        close(fd);
+        throw std::runtime_error("Failed to send info command: " + std::string(strerror(errno)));
+    }
+    usleep(100000);
+
+    // start scan
+    uint8_t start_cmd[] = {0xA5, 0x40};
     if (write(fd, start_cmd, sizeof(start_cmd)) != sizeof(start_cmd)) {
         close(fd);
         throw std::runtime_error("Failed to send start command: " + std::string(strerror(errno)));
     }
-    usleep(100000); // 0.1s delay
+    usleep(100000); 
 }
 
 YDLidarX4Reader::~YDLidarX4Reader() {
