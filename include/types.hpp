@@ -13,6 +13,6 @@ struct LidarPoint {
 struct LaserScan {
     std::vector<LidarPoint> points; // a vector of lidar points
     uint64_t timestamp; // timestamp in milliseconds
-}
+};
 
 #endif

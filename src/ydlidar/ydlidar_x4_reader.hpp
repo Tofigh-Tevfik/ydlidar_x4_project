@@ -4,6 +4,7 @@
 #include <vector>
 #include <cstdint>
 #include <string>
+#include "types.hpp"
 
 class YDLidarX4Reader {
     private:
@@ -16,6 +17,7 @@ class YDLidarX4Reader {
     YDLidarX4Reader();
     ~YDLidarX4Reader();
     void readData();
+    LaserScan parseData();
     int getFileDescriptor() const;
 };
 
