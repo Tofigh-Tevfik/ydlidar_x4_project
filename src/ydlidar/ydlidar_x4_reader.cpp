@@ -77,60 +77,60 @@ void YDLidarX4Reader::readData() {
 
 
 LaserScan YDLidarX4Reader::parseData() {
-    std::vector<uint8_t> buffer(BUFFER_SIZE);
     LaserScan scan;
     scan.timestamp = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count()
     );
 
-    // finding packet header (0x55AA)
+    // Step 1: Wait for header (0xAA 0x55)
+    uint8_t header[2];
     while (true) {
-        ssize_t bytes_read = read(fd, buffer.data(), 2);
-        if (bytes_read < 2) continue;
-        if (buffer[0] == 0x55 && buffer[1] == 0xAA) break;
+        if (read(fd, header, 2) != 2) continue;
+        if (header[0] == 0xAA && header[1] == 0x55) break;
     }
 
-    // reading packer header (8 bytes: type, count, start/end angles)
-    buffer.resize(8);
-    if (read(fd, buffer.data(), 8) != 8) {
-        throw std::runtime_error("Failed to read packet header");
+    // Step 2: Read header fields (CT, LSN, FSA, LSA, CS)
+    uint8_t meta[8];
+    if (read(fd, meta, 8) != 8) {
+        throw std::runtime_error("Failed to read packet meta");
     }
 
-    uint8_t type = buffer[0];
-    uint8_t sample_count = buffer[1];
-    uint16_t start_angle = (buffer[3] << 8) | buffer[2];
-    uint16_t end_angle = (buffer[5] << 8) | buffer[4];
-    uint8_t checksum = buffer[7];
+    uint8_t ct = meta[0];
+    uint8_t lsn = meta[1];
+    uint16_t fsa = (meta[3] << 8) | meta[2];
+    uint16_t lsa = (meta[5] << 8) | meta[4];
+    uint16_t cs_read = (meta[7] << 8) | meta[6];
 
-    // validation
-    if (type != 0x01) {
-        throw std::runtime_error("Invalid packet type: " + std::to_string(type));
+    if (lsn == 0) throw std::runtime_error("Invalid LSN: 0");
+
+    // Step 3: Read sample data
+    std::vector<uint8_t> samples(lsn * 2);
+    if (read(fd, samples.data(), samples.size()) != static_cast<ssize_t>(samples.size())) {
+        throw std::runtime_error("Failed to read sample data");
     }
 
-    // reading data points
-    buffer.resize(sample_count * 2);
-    if (read(fd, buffer.data(), sample_count * 2) != sample_count * 2) {
-        throw std::runtime_error("Failed to read data points");
-    }
+    // Step 4: Checksum calculation (XOR of CT to last Si byte)
+    uint16_t cs_calc = 0;
+    for (int i = 0; i < 6; ++i) cs_calc ^= meta[i];  // CT to LSA
+    for (auto b : samples) cs_calc ^= b;
 
-    // compute angles and distances
-    float start_angle_deg = start_angle / 64.0f;
-    float end_angle_deg = end_angle / 64.0f;
-    float angle_step = (end_angle_deg - start_angle_deg) / (sample_count - 1);
-
-    scan.points.reserve(sample_count);
-    for (size_t i = 0; i < sample_count; ++i) {
-        uint16_t distance = (buffer[i * 2 + 1] << 8) | buffer[i * 2];
-        float angle = start_angle_deg + i * angle_step;
-        scan.points.push_back({angle, static_cast<float>(distance)});
-    }
-
-    // validating checksum (XOR of data bytes)
-    uint8_t calc_checksum = 0x55 ^ 0xAA;
-    for (size_t i = 0; i < 6; ++i) calc_checksum ^= buffer[i];
-    for (size_t i = 0; i < sample_count * 2; i++) calc_checksum ^= buffer[i];
-    if (calc_checksum != checksum) {
+    if (cs_calc != cs_read) {
         throw std::runtime_error("Checksum mismatch");
+    }
+
+    // Step 5: Decode angles and distances
+    float angle_fsa = (fsa >> 1) / 64.0f;
+    float angle_lsa = (lsa >> 1) / 64.0f;
+    float angle_diff = angle_lsa - angle_fsa;
+    if (angle_diff < 0) angle_diff += 360.0f;
+    float angle_step = angle_diff / (lsn - 1);
+
+    scan.points.reserve(lsn);
+    for (size_t i = 0; i < lsn; ++i) {
+        uint16_t raw = (samples[2 * i + 1] << 8) | samples[2 * i];
+        float dist_mm = raw / 4.0f;
+        float angle = angle_fsa + i * angle_step;
+        scan.points.push_back({angle, dist_mm});
     }
 
     return scan;
