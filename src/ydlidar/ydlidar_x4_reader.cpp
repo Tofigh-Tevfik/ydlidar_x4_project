@@ -71,7 +71,7 @@ void YDLidarX4Reader::readData() {
         for (const auto& point : scan.points) {
             printf("Angle: %.2f deg, Distance: %.2f mm\n", point.angle, point.distance);
         }
-        usleep(1000);
+        // usleep(1000);
     }
 }
 
@@ -82,14 +82,14 @@ LaserScan YDLidarX4Reader::parseData() {
         std::chrono::system_clock::now().time_since_epoch()).count()
     );
 
-    // Step 1: Wait for header (0xAA 0x55)
+    // Wait for header (0xAA 0x55)
     uint8_t header[2];
     while (true) {
         if (read(fd, header, 2) != 2) continue;
         if (header[0] == 0xAA && header[1] == 0x55) break;
     }
 
-    // Step 2: Read header fields (CT, LSN, FSA, LSA, CS)
+    // Read header fields (CT, LSN, FSA, LSA, CS)
     uint8_t meta[8];
     if (read(fd, meta, 8) != 8) {
         throw std::runtime_error("Failed to read packet meta");
@@ -103,27 +103,43 @@ LaserScan YDLidarX4Reader::parseData() {
 
     if (lsn == 0) throw std::runtime_error("Invalid LSN: 0");
 
-    // Step 3: Read sample data
+    // Read sample data
     std::vector<uint8_t> samples(lsn * 2);
     if (read(fd, samples.data(), samples.size()) != static_cast<ssize_t>(samples.size())) {
         throw std::runtime_error("Failed to read sample data");
     }
 
-    // Step 4: Checksum calculation (XOR of CT to last Si byte)
+    // Checksum calculation (XOR of CT to last Si byte)
+    std::vector<uint8_t> full_packet;
+    full_packet.insert(full_packet.end(), header, header + 2);     // 0xAA, 0x55
+    full_packet.insert(full_packet.end(), meta, meta + 6);         // CT, LSN, FSA, LSA (NOT CS)
+    full_packet.insert(full_packet.end(), samples.begin(), samples.end()); // Si
+
+    if (full_packet.size() % 2 != 0) {
+        throw std::runtime_error("Data length is not even for 16-bit XOR");
+    }
+
     uint16_t cs_calc = 0;
-    for (int i = 0; i < 6; ++i) cs_calc ^= meta[i];  // CT to LSA
-    for (auto b : samples) cs_calc ^= b;
+    for (size_t i = 0; i < full_packet.size(); i += 2) {
+        uint16_t word = full_packet[i] | (full_packet[i + 1] << 8);  // little-endian
+        cs_calc ^= word;
+    }
+    
+    std::cout << "check sum: " << cs_calc << " := " << cs_read << std::endl;
 
     if (cs_calc != cs_read) {
         throw std::runtime_error("Checksum mismatch");
     }
 
-    // Step 5: Decode angles and distances
+    // Decode angles and distances
     float angle_fsa = (fsa >> 1) / 64.0f;
     float angle_lsa = (lsa >> 1) / 64.0f;
     float angle_diff = angle_lsa - angle_fsa;
     if (angle_diff < 0) angle_diff += 360.0f;
     float angle_step = angle_diff / (lsn - 1);
+
+    std::cout << "First angle: " << angle_fsa << std::endl;
+    std::cout << "Last angle: " << angle_lsa << std::endl;
 
     scan.points.reserve(lsn);
     for (size_t i = 0; i < lsn; ++i) {
