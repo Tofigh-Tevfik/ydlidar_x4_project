@@ -1,15 +1,14 @@
 cmake_minimum_required(VERSION 3.10)
-project(YDLidarX4Project LANGUAGES CXX)
+project(ydlidar_x4_project)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# include directories
-include_directories(${CMAKE_SOURCE_DIR}/src/ydlidar)
-
-# lidar module
 add_subdirectory(src/ydlidar)
+add_subdirectory(src/zmq)
 
-# main exec
-add_executable(ydlidar_x4_app src/main.cpp)
-target_link_libraries(ydlidar_x4_app ydlidar)
+add_executable(ydlidar_x4_publisher src/main_publisher.cpp)
+target_link_libraries(ydlidar_x4_publisher ydlidar zmq)
+
+add_executable(ydlidar_x4_subscriber src/main_subscriber.cpp)
+target_link_libraries(ydlidar_x4_subsciber zmq)
