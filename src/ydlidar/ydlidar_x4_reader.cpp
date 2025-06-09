@@ -124,8 +124,6 @@ LaserScan YDLidarX4Reader::parseData() {
         uint16_t word = full_packet[i] | (full_packet[i + 1] << 8);  // little-endian
         cs_calc ^= word;
     }
-    
-    std::cout << "check sum: " << cs_calc << " := " << cs_read << std::endl;
 
     if (cs_calc != cs_read) {
         throw std::runtime_error("Checksum mismatch");
@@ -137,9 +135,6 @@ LaserScan YDLidarX4Reader::parseData() {
     float angle_diff = angle_lsa - angle_fsa;
     if (angle_diff < 0) angle_diff += 360.0f;
     float angle_step = angle_diff / (lsn - 1);
-
-    std::cout << "First angle: " << angle_fsa << std::endl;
-    std::cout << "Last angle: " << angle_lsa << std::endl;
 
     scan.points.reserve(lsn);
     for (size_t i = 0; i < lsn; ++i) {
