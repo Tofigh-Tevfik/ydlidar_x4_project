@@ -9,14 +9,14 @@ Publisher::Publisher(const std::string& endpoint) : context(1), socket(context, 
     }
 }
 
-void Publisher::publish(const LidarScan& scan) {
+void Publisher::publish(const LaserScan& scan) {
     // send topic
     zmq::message_t topic("lidar_scan", 10);
     socket.send(topic, zmq::send_flags::sndmore);
 
     // serialize LidarScan: timestamp + number of points + points
     size_t points_size = scan.points.size();
-    size_t buffer_size = sizeof(uint_64t) + sizeof(size_t) + points_size + sizeof(LidarPoint);
+    size_t buffer_size = sizeof(uint64_t) + sizeof(size_t) + points_size + sizeof(LidarPoint);
     std::vector<uint8_t> buffer(buffer_size);
 
     size_t offset = 0;
@@ -28,5 +28,5 @@ void Publisher::publish(const LidarScan& scan) {
 
     // send data
     zmq::message_t message(buffer.data(), buffer_size);
-    socket.send(message, zmq::null);
+    socket.send(message, zmq::send_flags::none);
 }

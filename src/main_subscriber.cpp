@@ -1,4 +1,4 @@
-#include "subscriber.hpp"
+#include "zmq/subscriber.hpp"
 #include <iostream>
 
 int main() {
@@ -6,9 +6,9 @@ int main() {
         Subscriber sub;
         std::cout << "Subscribing to Lidar data on tcp:://localhost:5555..." << std::endl;
         while(true) {
-            LidarScan scan;
+            LaserScan scan;
             if (sub.callback(scan)) {
-                std::cout << "Received scan at timestamp: " << scan.timestamp << " us" <, std::endl;
+                std::cout << "Received scan at timestamp: " << scan.timestamp << " us" << std::endl;
                 for (const auto& point : scan.points) {
                     printf("Angle: %.2f deg, Distance: %.2f mm\n", point.angle, point.distance);
                 }

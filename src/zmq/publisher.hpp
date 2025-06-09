@@ -12,7 +12,7 @@ class Publisher {
 
     public:
         Publisher(const std::string& endpoint = "tcp://*:5555");
-        void publish(const LidarScan& scan);
+        void publish(const LaserScan& scan);
 };
 
 #endif

@@ -7,12 +7,12 @@
 
 class Subscriber {
     private:
-        zmg::context_t context;
+        zmq::context_t context;
         zmq::socket_t socket;
 
     public:
         Subscriber(const std::string& endpoint = "tcp://localhost:5555");
-        bool callback(LidarScan& scan);
+        bool callback(LaserScan& scan);
 };
 
 #endif

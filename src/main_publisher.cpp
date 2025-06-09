@@ -1,5 +1,5 @@
-#include "ydlidar_x4_reader.hpp"
-#include "publisher.hpp"
+#include "ydlidar/ydlidar_x4_reader.hpp"
+#include "zmq/publisher.hpp"
 #include "iostream"
 
 int main() {
@@ -8,10 +8,10 @@ int main() {
         Publisher pub;
         std::cout << "Publishing Lidara data on tcp://*:5555..." << std::endl;
         while(true) {
-            LidarScan scan = lidar.parseData();
+            LaserScan scan = lidar.parseData();
             pub.publish(scan);
             for (const auto& point : scan.points) {
-                printf("Published - Angle: %.2f deg, Distance: %.2f mm\n", point.agnle, point.distance);
+                printf("Published - Angle: %.2f deg, Distance: %.2f mm\n", point.angle, point.distance);
             }
             usleep(1000); // 1ms delay
         }

@@ -8,7 +8,7 @@ add_subdirectory(src/ydlidar)
 add_subdirectory(src/zmq)
 
 add_executable(ydlidar_x4_publisher src/main_publisher.cpp)
-target_link_libraries(ydlidar_x4_publisher ydlidar zmq)
+target_link_libraries(ydlidar_x4_publisher ydlidar zmq_nodes)
 
 add_executable(ydlidar_x4_subscriber src/main_subscriber.cpp)
-target_link_libraries(ydlidar_x4_subsciber zmq)
+target_link_libraries(ydlidar_x4_subscriber zmq_nodes)
