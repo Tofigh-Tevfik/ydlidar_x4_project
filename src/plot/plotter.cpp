@@ -8,7 +8,7 @@
 
 Plotter::Plotter(const std::string& endpoint) 
     : sub(endpoint), window(sf::VideoMode(800, 600), "YDLidar X4 Scan"),
-      scale(0.1f), origin(400.f, 300.f) {
+      scale(1.f), origin(400.f, 300.f) {
     window.setFramerateLimit(60);
 }
 
@@ -33,7 +33,13 @@ void Plotter::run() {
 
             // draw points
             for (const auto& point : scan.points) {
-                float angle_rad = point.angle * M_PI / 180.f;
+                float angle = point.angle;
+                // some angles exceed the value 360.0
+                if (angle > 360.f) {
+                    angle -= 360.f;
+                }
+
+                float angle_rad = angle * M_PI / 180.f;           
                 float x = point.distance * std::cos(angle_rad) * scale;
                 float y = point.distance * std::sin(angle_rad) * scale;
                 sf::CircleShape dot(2.f);
@@ -41,8 +47,7 @@ void Plotter::run() {
                 dot.setPosition(origin.x + x - 2.f, origin.y - y - 2.f);
                 window.draw(dot);
             }
-
-            window.display();
         }
+        window.display();
     }
 }

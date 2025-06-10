@@ -13,7 +13,7 @@ class Plotter {
         sf::Vector2f origin;
 
     public:
-        Plotter(const std::string& endpoint = "tcp://localhost::5555");
+        Plotter(const std::string& endpoint = "tcp://localhost:5555");
         void run();
 };
 
