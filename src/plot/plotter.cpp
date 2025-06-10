@@ -7,7 +7,7 @@
 #endif
 
 Plotter::Plotter(const std::string& endpoint) 
-    : sub(endpoint), window(sf:VideoMode(800, 600), "YDLidar X4 Scan"),
+    : sub(endpoint), window(sf::VideoMode(800, 600), "YDLidar X4 Scan"),
       scale(0.1f), origin(400.f, 300.f) {
     window.setFramerateLimit(60);
 }

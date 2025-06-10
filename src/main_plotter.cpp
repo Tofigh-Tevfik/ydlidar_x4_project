@@ -1,4 +1,4 @@
-#include "plotter.hpp"
+#include "plot/plotter.hpp"
 #include <iostream>
 
 int main() {

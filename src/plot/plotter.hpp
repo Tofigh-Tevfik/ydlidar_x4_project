@@ -2,7 +2,7 @@
 #define PLOTTER_HPP
 
 #include "types.hpp"
-#include "subscriber.hpp"
+#include "../zmq/subscriber.hpp"
 #include <SFML/Graphics.hpp>
 
 class Plotter {
