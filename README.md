@@ -92,7 +92,7 @@ For questions, issues, or contributions:
 ## Upcoming Updates
 
 The project is complete in its current form, but the following documentation efforts are planned:
-- **Project Summary Document**: A detailed report summarizing the project’s architecture, implementation, and lessons learned.
+- **Project Summary Document**: A detailed report summarizing the project’s architecture, implementation, and lessons learned. (Done)
 - **Demonstrative Video**: A short video showcasing the LiDAR data acquisition, ZeroMQ messaging, and SFML visualization in action.
 
 > No additional code updates are planned at this time.
