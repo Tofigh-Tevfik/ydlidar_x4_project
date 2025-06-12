@@ -83,6 +83,23 @@ sudo ./ydlidar_x4_publisher
 - Displays a window with green points representing LiDAR scans
 - Close the window to exit
 
+### Plotting LiDAR Data from a Remote Device
+
+To visualize LiDAR data from another device on the same local network, update the plotter's endpoint from:
+
+```
+"tcp://localhost:5555"
+```
+
+to the IP address of the remote device, for example:
+
+```
+"tcp://192.168.1.21:5555"
+```
+
+Replace `192.168.1.21` with the actual IP address of the device running the LiDAR publisher.
+
+
 ## Contact
 
 For questions, issues, or contributions:
