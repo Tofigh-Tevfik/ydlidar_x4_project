@@ -1,5 +1,6 @@
 #include "zmq/subscriber.hpp"
 #include <iostream>
+#include <unistd.h>
 
 int main() {
     try {

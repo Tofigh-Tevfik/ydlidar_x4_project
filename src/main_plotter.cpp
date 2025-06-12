@@ -1,5 +1,6 @@
 #include "plot/plotter.hpp"
 #include <iostream>
+#include <unistd.h>
 
 int main() {
     try {
