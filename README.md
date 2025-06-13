@@ -100,7 +100,7 @@ to the IP address of the remote device, for example:
 Replace `192.168.1.21` with the actual IP address of the device running the LiDAR publisher.
 
 ## Demo Video
-[![Watch the Demo](https://img.shields.io/badge/YouTube-Watch%20Demo-red?logo=youtube)](https://youtu.be/TBC5uqdGn5M
+[![Watch the Demo](https://img.shields.io/badge/YouTube-Watch%20Demo-red?logo=youtube)](https://youtu.be/TBC5uqdGn5M)
 
 
 ## Contact
